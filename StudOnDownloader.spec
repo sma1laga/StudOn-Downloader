@@ -8,7 +8,11 @@ a = Analysis(
     pathex=['.'],
     binaries=[],
     datas=[],
-    hiddenimports=[],
+    hiddenimports=[
+        'studon_downloader',
+        'studon_downloader.core',
+        'studon_downloader.gui',
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

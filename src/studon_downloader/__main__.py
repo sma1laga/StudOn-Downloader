@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-import sys
+from importlib import import_module
+
 
 
 def _import_create_gui():
@@ -16,20 +16,13 @@ def _import_create_gui():
     ``ImportError: attempted relative import with no known parent package``.
 
     To keep both execution paths working we attempt the relative import first
-    and fall back to importing the sibling module directly after adding the
-    package *parent* directory to ``sys.path``.
+    and fall back to importing the sibling module directly via its fully
+    qualified name.
     """
 
     if __package__:
         from .gui import create_gui  # type: ignore[import-not-found]
         return create_gui
-
-    package_dir = Path(__file__).resolve().parent
-    package_parent = str(package_dir.parent)
-    if package_parent not in sys.path:
-        sys.path.insert(0, package_parent)
-
-    from importlib import import_module
 
     module = import_module("studon_downloader.gui")
     return module.create_gui
