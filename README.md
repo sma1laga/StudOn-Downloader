@@ -1,41 +1,80 @@
 # StudOn Downloader
 
-StudOn Downloader is a small Windows GUI utility that collects every downloadable file from a StudOn page and saves the files to a folder on your computer. It accepts any StudOn page that displays PDFs or other files ("sendfile", "download", etc.) and downloads them immediately once you provide the session cookie that proves you are logged in.
+StudOn Downloader is a polished desktop utility that collects every downloadable file from a StudOn page and saves it to a folder
+on your computer. The application ships with a Tkinter-based interface and includes build scripts for producing a standalone
+`StudOnDownloader.exe` as well as an installer (`StudOnDownloaderSetup.exe`) for distribution.
 
-## Requirements
+## Features
 
-- Windows 10/11 with Python 3.10 or newer installed and added to your PATH
-- Internet connection to reach StudOn
-- A valid StudOn session (you must be logged in via your browser so you can copy the session cookie)
+- Intuitive GUI that guides you through URL, folder, and cookie configuration.
+- Automatic detection of `.pdf`, `sendfile`, and generic `download` links on StudOn pages.
+- Detailed logging view for monitoring progress and troubleshooting.
+- Packaged as a real Windows application via PyInstaller, optionally wrapped with an Inno Setup installer.
 
-Install the Python dependencies once:
+## Project layout
 
-```bash
-python -m pip install requests beautifulsoup4
+```
+├─ installer/                 # Inno Setup script used to build StudOnDownloaderSetup.exe
+├─ src/studon_downloader/     # Python package with GUI and download logic
+├─ StudOnDownloader.spec      # PyInstaller configuration (builds StudOnDownloader.exe)
+├─ download_studon_pdfs.py    # Legacy launcher that forwards to the packaged GUI
+└─ pyproject.toml             # Project metadata + dependencies
 ```
 
-## Downloading the tool
+## Running from source
 
-1. Download or clone this repository.
-   - **Zip:** Press the green "Code" button on GitHub, choose "Download ZIP", and extract it to any folder.
-   - **Git:** `git clone https://github.com/<your-account>/StudOn-Downloader.git`
-2. Open the folder in Explorer.
+1. Install Python 3.10+ and ensure `python`/`pip` is available on your PATH.
+2. Create a virtual environment (recommended) and install the dependencies:
 
-## Running the downloader
+   ```bash
+   python -m venv .venv
+   .venv\\Scripts\\activate   # PowerShell on Windows
+   python -m pip install -U pip
+   python -m pip install -e .
+   ```
 
-1. Double-click `download_studon_pdfs.py` or run `python download_studon_pdfs.py` from PowerShell/CMD.
-2. Enter the StudOn URL that lists the files you want. Enable “show all objects on one page” inside StudOn if possible so every file is visible.
-3. Choose a target folder where the files should be saved.
-4. Provide the cookie name and value for your StudOn session:
-   - Sign in to StudOn in your browser.
-   - Press `F12` to open the developer tools.
-   - Chrome/Edge: Application → Storage → Cookies → your StudOn URL.
-   - Firefox: Storage → Cookies.
-   - Copy the session cookie (usually `PHPSESSID`, `ILIAS_LOGIN`, or similar) and paste its name and value into the two fields.
-5. Press **Start download**. Every detected file (PDFs or other download links) will be downloaded into the target folder. The log box shows progress and any errors.
+3. Start the GUI via either command:
 
-## Tips
+   ```bash
+   python -m studon_downloader
+   # or
+   studon-downloader
+   ```
 
-- If nothing is downloaded, verify that the page shows links ending in `.pdf`, `sendfile`, or `download`. Switch StudOn to show all objects or open the folder containing the files directly.
-- If you receive authentication errors, make sure the cookie is still valid (reload StudOn in your browser and copy the cookie again).
-- Each run overwrites files with the same name. Create a dedicated folder per lecture/collection if needed.
+4. Enter the StudOn URL, choose a download folder, and provide a valid session cookie value. Use the help text in the application
+   to find the cookie name/value inside your browser's developer tools.
+
+## Building a standalone `StudOnDownloader.exe`
+
+1. Install PyInstaller (already listed under the `ui` optional dependency):
+
+   ```bash
+   python -m pip install -e .[ui]
+   ```
+
+2. Run PyInstaller with the provided spec file:
+
+   ```bash
+   pyinstaller StudOnDownloader.spec
+   ```
+
+   The compiled executable and supporting files will be placed under `dist/StudOnDownloader/StudOnDownloader.exe`.
+
+## Creating `StudOnDownloaderSetup.exe`
+
+1. Build the standalone app as described above. Ensure `dist/StudOnDownloader` contains `StudOnDownloader.exe`.
+2. Install [Inno Setup](https://jrsoftware.org/isinfo.php) on Windows.
+3. Open `installer/StudOnDownloader.iss` in the Inno Setup IDE (or run `iscc installer/StudOnDownloader.iss`).
+4. The resulting installer (`dist/StudOnDownloaderSetup.exe`) can be distributed to end users. It creates Start Menu entries and an
+   optional desktop shortcut, then launches the application after installation.
+
+## Tips & troubleshooting
+
+- If no files download, make sure the StudOn page lists links ending in `.pdf`, `sendfile`, or `download`. Switch StudOn to "show
+  all objects on one page" for best results.
+- Authentication problems usually mean the session cookie expired. Refresh StudOn in your browser, copy the cookie again, and retry.
+- The GUI writes detailed status updates to the log panel; include the log output when reporting issues.
+
+## License
+
+This project is provided as-is without warranty. Use it only with StudOn content you are allowed to access.
